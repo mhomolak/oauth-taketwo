@@ -1,3 +1,3 @@
 heroku link - https://tranquil-temple-87653.herokuapp.com/
 
-Redoing OAuth with Facebook.
+Redoing OAuth with Twitter.
