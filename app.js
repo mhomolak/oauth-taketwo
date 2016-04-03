@@ -7,6 +7,7 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var TwitterStrategy = require('passport-twitter').Strategy;
 var passport = require('passport');
+var cookieSession = require('cookie-session');
 
 var routes = require('./routes/index');
 var users = require('./routes/users');
@@ -27,11 +28,18 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(passport.initialize());
 app.use(passport.session());
 
+app.use(cookieSession({
+  name: 'user',
+  secret: process.env.TWITTER_CONSUMER_SECRET
+}));
+
 app.get('/auth/twitter',
-  passport.authenticate('twitter'));
+  passport.authenticate('twitter'),
+  function(req, res) {
+  });
 
 app.get('/auth/twitter/callback',
-  passport.authenticate('twitter', { failureRedirect: '/loging '}),
+  passport.authenticate('twitter', { failureRedirect: '/login '}),
   function(req, res) {
     //Successful authentication, redirect home.
     res.redirect('/');
@@ -55,6 +63,15 @@ passport.serializeUser(function(user, done) {
 
 passport.deserializeUser(function(id, done) {
   done(null, user);
+});
+
+app.use(function (req, res, next) {
+  if (!req.session.passport) {
+    app.locals.user = null;
+  } else {
+    res.locals.user = req.session.passport.user
+  }
+  next()
 });
 
 app.use('/', routes);
